@@ -65,17 +65,19 @@ def z_set(DICT):
     return z
 ########################################################################################################################
 """NAME DATA SET"""
-def name_set(DICT1, DICT2):
+def name_set(DICT1, DICT2, DICT3):
     name = []
     for key in DICT1:
         name.append(key)
     for key in DICT2:
         name.append(key)
+    for key in DICT3:
+        name.append(key)
     return name
 ########################################################################################################################
 """PLOT MASS VS. dZ"""
-def plot_Z(DICT1, DICT2):
-    names = name_set(DICT1, DICT2)
+def plot_Z(DICT1, DICT2, DICT3):
+    names = name_set(DICT1, DICT2, DICT3)
     ################################################################################
     Ord_mass = mass_set(DICT1)
     Ord_z = z_set(DICT1)
@@ -83,6 +85,8 @@ def plot_Z(DICT1, DICT2):
     Dis_mass = mass_set(DICT2)
     Dis_z = z_set(DICT2)
     ################################################################################
+    Unk_mass = mass_set(DICT3)
+    Unk_z = mass_set(DICT3)
     ################################################################################
     fig1, ax = plt.subplots()
     sc1 = plt.scatter(Ord_mass, Ord_z, color='g')
@@ -93,8 +97,13 @@ def plot_Z(DICT1, DICT2):
     annot2 = ax.annotate("", xy=(0, 0), xytext=(20, 20), textcoords="offset points",
                          bbox=dict(boxstyle="round", fc="w"),
                          arrowprops=dict(arrowstyle="->"))
+    sc3 = plt.scatter(Unk_mass, Unk_z, color='r')
+    annot3 = ax.annotate("", xy=(0, 0), xytext=(20, 20), textcoords="offset points",
+                         bbox=dict(boxstyle="round", fc="w"),
+                         arrowprops=dict(arrowstyle="->"))
     annot1.set_visible(False)
     annot2.set_visible(False)
+    annot3.set_visible(False)
     ################################################################################
     ################# GENERATING POP-UP LABELS FOR DATA POINTS #####################
     def update_annot1(ind):
@@ -141,15 +150,35 @@ def plot_Z(DICT1, DICT2):
     ##################################################################################
     fig1.canvas.mpl_connect("motion_notify_event", hover)
     ##################################################################################
+    def update_annot3(ind):
+        pos = sc3.get_offsets()[ind["ind"][0]]
+        annot3.xy = pos
+        text = "{}".format(" ".join([names[n] for n in ind["ind"]]))
+        annot3.set_text(text)
+        annot3.get_bbox_patch().set_alpha(0.4)
+    ##################################################################################
+    def hover(event):
+        vis = annot3.get_visible()
+        if event.inaxes == ax:
+            cont, ind = sc3.contains(event)
+            if cont:
+                update_annot3(ind)
+                annot3.set_visible(True)
+                fig1.canvas.draw_idle()
+            else:
+                if vis:
+                    annot3.set_visible(False)
+                    fig1.canvas.draw_idle()
+    ##################################################################################
+    fig1.canvas.mpl_connect("motion_notify_event", hover)
     ################################## PLOT GRAPH ####################################
-    plt.title('Molecular Weight vs. \u0394Z')
     plt.ylabel('\u0394Z')
     plt.xlabel('Molecular Weight/Da')
     plt.show()
 ########################################################################################################################
 """PLOT MASS VS. dCCS"""
-def plot_CCS(DICT1, DICT2):
-    names = name_set(DICT1, DICT2)
+def plot_CCS(DICT1, DICT2, DICT3):
+    names = name_set(DICT1, DICT2, DICT3)
     ################################################################################
     Ord_mass = mass_set(DICT1)
     Ord_ccs = ccs_set(DICT1)
@@ -157,6 +186,8 @@ def plot_CCS(DICT1, DICT2):
     Dis_mass = mass_set(DICT2)
     Dis_ccs = ccs_set(DICT2)
     ################################################################################
+    Unk_mass = mass_set(DICT3)
+    Unk_ccs = ccs_set(DICT3)
     ################################################################################
     fig1, ax = plt.subplots()
     sc1 = plt.scatter(Ord_mass, Ord_ccs, color='g')
@@ -167,9 +198,13 @@ def plot_CCS(DICT1, DICT2):
     annot2 = ax.annotate("", xy=(0, 0), xytext=(20, 20), textcoords="offset points",
                          bbox=dict(boxstyle="round", fc="w"),
                          arrowprops=dict(arrowstyle="->"))
+    sc3 = plt.scatter(Unk_mass, Unk_ccs, color='r')
+    annot3 = ax.annotate("", xy=(0, 0), xytext=(20, 20), textcoords="offset points",
+                         bbox=dict(boxstyle="round", fc="w"),
+                         arrowprops=dict(arrowstyle="->"))
     annot1.set_visible(False)
     annot2.set_visible(False)
-
+    annot3.set_visible(False)
     ################################################################################
     ################# GENERATING POP-UP LABELS FOR DATA POINTS #####################
     def update_annot1(ind):
@@ -218,19 +253,38 @@ def plot_CCS(DICT1, DICT2):
                     annot2.set_visible(False)
                     fig1.canvas.draw_idle()
 
+    ###################################################################################
+    fig1.canvas.mpl_connect("motion_notify_event", hover)
+    ###################################################################################
+    def update_annot3(ind):
+        pos = sc3.get_offsets()[ind["ind"][0]]
+        annot3.xy = pos
+        text = "{}".format(" ".join([protnam[n] for n in ind["ind"]]))
+        annot3.set_text(text)
+        annot3.get_bbox_patch().set_alpha(0.4)
+    ###################################################################################
+    def hover(event):
+        vis = annot3.get_visible()
+        if event.inaxes == ax:
+            cont, ind = sc3.contains(event)
+            if cont:
+                update_annot3(ind)
+                annot3.set_visible(True)
+                fig1.canvas.draw_idle()
+            else:
+                if vis:
+                    annot3.set_visible(False)
+                    fig1.canvas.draw_idle()
     ##################################################################################
     fig1.canvas.mpl_connect("motion_notify_event", hover)
-    ##################################################################################
     ################################## PLOT GRAPH ####################################
-    plt.title('Molecular Weight vs. \u0394CCS')
     plt.ylabel('\u0394CCS')
     plt.xlabel('Molecular Weight/Da')
     plt.show()
 ########################################################################################################################
-plot_CCS(ORDDICT, DISDICT)
-plot_Z(ORDDICT, DISDICT)
+plot_CCS(ORDDICT, DISDICT, UNKDICT)
+plot_Z(ORDDICT, DISDICT, UNKDICT)
 ########################################################################################################################
-
 ########################################################################################################################
 #######################################################################################################################
 ########################################################################################################################
